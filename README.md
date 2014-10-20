@@ -131,7 +131,7 @@ end
 You can test a decorator using your favorite test framework by decorating the model instance with
 
 ```ruby
-ActiveDecorator::Decorator.instance.decorate(model_instance)
+ActiveDecorator.decorate(model_instance)
 ```
 
 Considering an `Organization` model and its simple decorator:
@@ -150,7 +150,7 @@ An RSpec test would look like:
 describe '#full_name' do
   it 'returns the full organization name' do
     organization = Organization.new(first_name: 'John', last_name: 'Doe')
-    decorated_organization = ActiveDecorator::Decorator.instance.decorate(organization)
+    decorated_organization = ActiveDecorator.decorate(organization)
 
     expect(decorated_organization.full_name).to eq('John Doe')
   end

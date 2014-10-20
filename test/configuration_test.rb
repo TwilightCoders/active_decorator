@@ -16,7 +16,7 @@ class ConfigurationTest < Test::Unit::TestCase
         config.decorator_suffix = 'Presenter'
       end
 
-      comic = ActiveDecorator::Decorator.instance.decorate Comic.new("amatsuda's (Poignant) Guide to ActiveDecorator", 3)
+      comic = ActiveDecorator.decorate Comic.new("amatsuda's (Poignant) Guide to ActiveDecorator", 3)
       assert_equal '$3', comic.price
     ensure
       ActiveDecorator.configure do |config|
