@@ -28,8 +28,9 @@ module ActiveDecorator
         obj.each do |r|
           decorate r
         end
-      elsif defined?(ActiveRecord) && obj.is_a?(ActiveRecord::Relation)
-        # don't call each nor to_a immediately
+      elsif defined?(ActiveRecord) &&
+            obj.is_a?(ActiveRecord::Relation) &&
+            !obj.respond_to?(:to_a_with_decorator)
         if obj.respond_to?(:records)
           # Rails 5.0
           obj.extend ActiveDecorator::RelationDecorator unless obj.is_a? ActiveDecorator::RelationDecorator
@@ -38,8 +39,17 @@ module ActiveDecorator
           obj.extend ActiveDecorator::RelationDecoratorLegacy unless obj.is_a? ActiveDecorator::RelationDecoratorLegacy
         end
       else
-        if defined?(ActiveRecord) && obj.is_a?(ActiveRecord::Base) && !obj.is_a?(ActiveDecorator::Decorated)
-          obj.extend ActiveDecorator::Decorated
+        d = decorator_for obj.class
+        unless !d || obj.is_a?(d)
+          obj.extend d
+          (class << obj; self; end).class_eval do
+            obj.class.reflect_on_all_associations.map(&:name).each do |assoc|
+              define_method(assoc) do |*args|
+                associated = super(*args)
+                ActiveDecorator::Decorator.instance.decorate associated, true
+              end
+            end
+          end if obj.class.respond_to? :reflect_on_all_associations
         end
 
         d = decorator_for obj.class
@@ -73,6 +83,8 @@ module ActiveDecorator
     rescue NameError
       if model_class.respond_to?(:base_class) && (model_class.base_class != model_class)
         @@decorators[model_class] = decorator_for model_class.base_class
+      elsif model_class < ActiveRecord::Base
+        @@decorators[model_class] = decorator_for model_class.superclass
       else
         # Cache nil results
         @@decorators[model_class] = nil
