@@ -1,7 +1,6 @@
 require 'active_decorator/version'
 require 'active_decorator/railtie'
 require 'active_decorator/base'
-require 'active_decorator/helpers'
 require 'active_record/base_decorator'
 
 module ActiveDecorator
@@ -30,8 +29,10 @@ module ActiveDecorator
       # binding.pry if klass < ActiveRecord::Base
       ActiveDecorator.decorate obj, klass.superclass if klass.superclass
 
+
       d = decorator_for klass
       return obj unless d
+      puts "Decorating #{obj.class.name} with (#{d.name})"
       obj.extend d unless obj.is_a? d
     end
   end
@@ -48,13 +49,13 @@ module ActiveDecorator
     decorator_name = "#{model_class.name}Decorator"
     d = decorator_name.constantize
     unless Class === d
-      # d.send :include, ActiveDecorator::Helpers
       d.send :include, ActiveDecorator::Base
       decorators[model_class] = d
     else
       decorators[model_class] = nil
     end
   rescue NameError
+    puts "Couldn't find Decorator for #{model_class.name} (#{decorator_name})"
     # if model_class < ActiveRecord::Base
     #   decorator_for model_class.superclass
     # else
