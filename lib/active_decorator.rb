@@ -1,3 +1,64 @@
 require 'active_decorator/version'
-require 'active_decorator/decorator'
 require 'active_decorator/railtie'
+require 'active_decorator/base'
+require 'active_decorator/helpers'
+require 'active_record/base_decorator'
+
+module ActiveDecorator
+
+  def self.decorate(obj, klass = nil)
+    return if obj.nil?
+
+    if Array === obj
+      obj.each do |r|
+        decorate r
+      end
+    elsif defined?(ActiveRecord) &&
+          obj.is_a?(ActiveRecord::Relation) &&
+          !obj.respond_to?(:to_a_with_decorator)
+      class << obj
+        def to_a_with_decorator
+          to_a_without_decorator.tap do |arr|
+            ActiveDecorator.decorate arr
+          end
+        end
+        alias_method_chain :to_a, :decorator
+      end
+    else
+
+      klass ||= obj.class
+      # binding.pry if klass < ActiveRecord::Base
+      ActiveDecorator.decorate obj, klass.superclass if klass.superclass
+
+      d = decorator_for klass
+      return obj unless d
+      obj.extend d unless obj.is_a? d
+    end
+  end
+
+  private
+
+  def self.decorators
+    @decorators ||= {}
+  end
+
+  def self.decorator_for(model_class)
+    return decorators[model_class] if decorators.key? model_class
+
+    decorator_name = "#{model_class.name}Decorator"
+    d = decorator_name.constantize
+    unless Class === d
+      # d.send :include, ActiveDecorator::Helpers
+      d.send :include, ActiveDecorator::Base
+      decorators[model_class] = d
+    else
+      decorators[model_class] = nil
+    end
+  rescue NameError
+    # if model_class < ActiveRecord::Base
+    #   decorator_for model_class.superclass
+    # else
+      decorators[model_class] = nil
+    # end
+  end
+end

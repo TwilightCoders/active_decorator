@@ -2,10 +2,10 @@ module ActiveDecorator
   module ActionViewExtension
     def setup_decorator
       @locals.values.each do |v|
-        ActiveDecorator::Decorator.instance.decorate v
+        ActiveDecorator.decorate v
       end unless @locals.blank?
-      ActiveDecorator::Decorator.instance.decorate @object unless @object.blank?
-      ActiveDecorator::Decorator.instance.decorate @collection unless @collection.blank?
+      ActiveDecorator.decorate @object unless @object.blank?
+      ActiveDecorator.decorate @collection unless @collection.blank?
 
       self
     end
