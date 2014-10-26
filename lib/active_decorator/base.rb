@@ -7,7 +7,7 @@ module ActiveDecorator
     end
 
     def method_missing(method, *args, &block)
-        super
+      super
       # TODO: need to make sure who raised the error?
     rescue NoMethodError, NameError => original_error
       begin

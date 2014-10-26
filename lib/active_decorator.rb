@@ -5,6 +5,7 @@ require 'active_decorator/config'
 require 'active_decorator/decorated'
 require 'active_decorator/base'
 require 'active_record/base_decorator'
+require 'active_record/relation_decorator'
 
 module ActiveDecorator
 
@@ -16,22 +17,12 @@ module ActiveDecorator
       obj.each do |r|
         ActiveDecorator.decorate r
       end
-    elsif defined?(ActiveRecord) && obj.is_a?(ActiveRecord::Relation) && !obj.respond_to?(:to_a_with_decorator)
-      class << obj
-        def to_a_with_decorator
-          to_a_without_decorator.tap do |arr|
-            ActiveDecorator.decorate arr
-          end
-        end
-        alias_method_chain :to_a, :decorator
-      end
     else
       if defined?(ActiveRecord) && obj.is_a?(ActiveRecord::Base) && !obj.is_a?(ActiveDecorator::Decorated)
         obj.extend ActiveDecorator::Decorated
       end
 
       klass ||= obj.class
-
       d = ActiveDecorator.decorator_for klass
       return obj unless d
       puts "Decorating #{obj.class.name} with (#{d.name})"
