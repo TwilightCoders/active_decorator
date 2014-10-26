@@ -1,9 +1,8 @@
 module ActiveRecord
   module BaseDecorator
     def self.extended(base)
-      super
       puts "ActiveRecord::BaseDecorator extended by #{base.class.name}"
-      base.class.class_eval do
+      class << base
         self.reflect_on_all_associations.map(&:name).each do |assoc|
           feature = :decorations
           with_method    = "#{assoc}_with_#{feature}"

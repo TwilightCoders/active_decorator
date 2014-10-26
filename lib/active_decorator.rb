@@ -2,6 +2,7 @@ require 'active_decorator/version'
 require 'active_decorator/railtie'
 require 'active_decorator/base'
 require 'active_record/base_decorator'
+require 'active_record/relation_decorator'
 
 module ActiveDecorator
 
@@ -10,25 +11,14 @@ module ActiveDecorator
 
     if Array === obj
       obj.each do |r|
-        decorate r
+        ActiveDecorator.decorate r
       end
-    elsif defined?(ActiveRecord) &&
-          obj.is_a?(ActiveRecord::Relation) &&
-          !obj.respond_to?(:to_a_with_decorator)
-      class << obj
-        def to_a_with_decorator
-          to_a_without_decorator.tap do |arr|
-            ActiveDecorator.decorate arr
-          end
-        end
-        alias_method_chain :to_a, :decorator
-      end
+
     else
 
       klass ||= obj.class
       # binding.pry if klass < ActiveRecord::Base
-      ActiveDecorator.decorate obj, klass.superclass if klass.superclass
-
+      # ActiveDecorator.decorate obj, klass.superclass if klass.superclass
 
       d = decorator_for klass
       return obj unless d
@@ -56,10 +46,10 @@ module ActiveDecorator
     end
   rescue NameError
     puts "Couldn't find Decorator for #{model_class.name} (#{decorator_name})"
-    # if model_class < ActiveRecord::Base
-    #   decorator_for model_class.superclass
-    # else
+    if model_class < ActiveRecord::Base
+      decorator_for model_class.superclass
+    else
       decorators[model_class] = nil
-    # end
+    end
   end
 end
