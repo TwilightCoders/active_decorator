@@ -19,7 +19,7 @@ module ActiveDecorator
     #
     # Always returns the object, regardless of whether decorated or not decorated.
     #
-    # This method can be publicly called from anywhere by `ActiveDecorator::Decorator.instance.decorate(obj)`.
+    # This method can be publicly called from anywhere by `ActiveDecorator.decorate(obj)`.
     def decorate(obj)
       return if defined?(Jbuilder) && (Jbuilder === obj)
       return if obj.nil?
@@ -46,7 +46,7 @@ module ActiveDecorator
             obj.class.reflect_on_all_associations.map(&:name).each do |assoc|
               define_method(assoc) do |*args|
                 associated = super(*args)
-                ActiveDecorator::Decorator.instance.decorate associated, true
+                ActiveDecorator.decorate associated, true
               end
             end
           end if obj.class.respond_to? :reflect_on_all_associations
@@ -96,7 +96,7 @@ module ActiveDecorator
   module RelationDecoratorLegacy
     def to_a
       super.tap do |arr|
-        ActiveDecorator::Decorator.instance.decorate arr
+        ActiveDecorator.decorate arr
       end
     end
   end
@@ -105,7 +105,7 @@ module ActiveDecorator
   module RelationDecorator
     def records
       super.tap do |arr|
-        ActiveDecorator::Decorator.instance.decorate arr
+        ActiveDecorator.decorate arr
       end
     end
   end
