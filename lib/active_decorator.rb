@@ -4,7 +4,6 @@ require 'active_decorator/railtie'
 require 'active_decorator/config'
 require 'active_decorator/decorated'
 require 'active_decorator/base'
-require 'active_decorator/helpers'
 require 'active_record/base_decorator'
 
 module ActiveDecorator
