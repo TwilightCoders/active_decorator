@@ -25,7 +25,7 @@ module ActiveDecorator
       klass ||= obj.class
       d = ActiveDecorator.decorator_for klass
       return obj unless d
-      puts "Decorating #{obj.class.name} with (#{d.name})"
+      logger.debug "Decorating #{obj.class.name} with (#{d.name})"
       obj.extend d unless obj.is_a? d
       obj
     end
@@ -35,6 +35,10 @@ module ActiveDecorator
   # Returns the association instance.
   def self.decorate_association(owner, target)
     owner.is_a?(ActiveDecorator::Decorated) ? decorate(target) : target
+  end
+
+  def self.logger
+    @logger ||= defined?(Rails) ? Rails.logger : Logger.new(STDOUT)
   end
 
   private
@@ -49,6 +53,7 @@ module ActiveDecorator
     return decorators[model_class] if decorators.key? model_class
 
     decorator_name = "#{model_class.name}#{ActiveDecorator.config.decorator_suffix}"
+
     d = decorator_name.constantize
     unless Class === d
       d.send :include, ActiveDecorator::Helpers
@@ -58,7 +63,7 @@ module ActiveDecorator
       decorators[model_class] = nil
     end
   rescue NameError
-    puts "Couldn't find Decorator for #{model_class.name} (#{decorator_name})"
+    logger.debug "Couldn't find Decorator for #{model_class.name} (#{decorator_name})"
     if model_class.respond_to?(:base_class) && (model_class.base_class != model_class)
       decorators[model_class] = ActiveDecorator.decorator_for model_class.base_class
     elsif model_class < ActiveRecord::Base
