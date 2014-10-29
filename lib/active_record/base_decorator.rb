@@ -4,6 +4,7 @@ module ActiveRecord
       puts "ActiveRecord::BaseDecorator extended by #{base.class.name}"
       class << base
         self.reflect_on_all_associations.map(&:name).each do |assoc|
+          puts "Reflecting on #{assoc}"
           feature = :decorations
           with_method    = "#{assoc}_with_#{feature}"
           without_method = "#{assoc}_without_#{feature}"

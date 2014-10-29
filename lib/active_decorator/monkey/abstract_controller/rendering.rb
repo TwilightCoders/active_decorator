@@ -7,7 +7,6 @@ module AbstractController
       end
       hash
     end
-
     alias_method_chain :view_assigns, :decorator
   end
 end

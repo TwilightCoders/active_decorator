@@ -37,6 +37,7 @@ module ActiveDecorator
     return decorators[model_class] if decorators.key? model_class
 
     decorator_name = "#{model_class.name}Decorator"
+    #binding.pry# if model_class.name == 'Submission::ActiveRecord_AssociationRelation'
     d = decorator_name.constantize
     unless Class === d
       d.send :include, ActiveDecorator::Base
@@ -46,10 +47,10 @@ module ActiveDecorator
     end
   rescue NameError
     puts "Couldn't find Decorator for #{model_class.name} (#{decorator_name})"
-    if model_class < ActiveRecord::Base
-      decorator_for model_class.superclass
-    else
-      decorators[model_class] = nil
-    end
+    decorators[model_class] = if model_class.superclass
+                                decorator_for model_class.superclass
+                              else
+                                nil
+                              end
   end
 end
