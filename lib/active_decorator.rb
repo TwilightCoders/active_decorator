@@ -22,7 +22,7 @@ module ActiveDecorator
 
       d = decorator_for klass
       return obj unless d
-      puts "Decorating #{obj.class.name} with (#{d.name})"
+      logger.debug "Decorating #{obj.class.name} with (#{d.name})"
       obj.extend d unless obj.is_a? d
     end
   end
@@ -31,6 +31,10 @@ module ActiveDecorator
 
   def self.decorators
     @decorators ||= {}
+  end
+
+  def self.logger
+    @logger ||= defined?(Rails) ? Rails.logger : Logger.new(STDOUT)
   end
 
   def self.decorator_for(model_class)
@@ -46,7 +50,7 @@ module ActiveDecorator
       decorators[model_class] = nil
     end
   rescue NameError
-    puts "Couldn't find Decorator for #{model_class.name} (#{decorator_name})"
+    logger.debug "Couldn't find Decorator for #{model_class.name} (#{decorator_name})"
     decorators[model_class] = if model_class.superclass
                                 decorator_for model_class.superclass
                               else
