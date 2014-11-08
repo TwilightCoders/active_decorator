@@ -24,6 +24,7 @@ module ActiveDecorator
       return obj unless d
       logger.debug "Decorating #{obj.class.name} with (#{d.name})"
       obj.extend d unless obj.is_a? d
+      obj
     end
   end
 
